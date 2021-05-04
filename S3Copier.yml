@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  REPO:
+    Type: String
+    Description: The Respository from where cloning will take place
+  VID:
+    Type: String
+    Description: The unique project identifier
+  ENDPOINT:
+    Type: String
+    Description: The endpoint to which events will be sent
+    Default: "arn:aws:s3:::codecopierresponse"
+
+
+Resources:
+  MyCustomResource:
+    Type: 'Custom::S3Copier'
+    Properties:
+      ServiceToken: 'arn:aws:lambda:us-east-1:618244506016:function:gitCustomLayer'
+      Repo: !Ref REPO
+      Vid: !Ref VID
+      Endpoint: !Ref ENDPOINT
+Outputs:
+  Status:
+    Value: !GetAtt MyCustomResource.Status
+
+
