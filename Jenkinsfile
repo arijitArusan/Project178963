@@ -1,34 +1,51 @@
+def getstatus(){
+    try{
+    STACK_CHECK_RESULT=sh(
+            script: "aws cloudformation describe-stacks --stack-name S3Copy --region us-east-1",
+            returnStatus:true
+           )
+    } catch (Exception e){
+      echo 'Exception occurred: ' + e.toString()
+    }finally{
+      return STACK_CHECK_RESULT
+      }
+
+}
 pipeline {
     agent any
-    parameters {
-    string (
-        defaultValue: 'An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id S3Copy does not exist',
-        description: '',
-        name : 'STACK_CHECK')
-    string (
-        defaultValue: 'Y',
-        description: '',
-        name : 'STACK_CHECK2')
-    }
+    environment {
+    STACK_CHECK_RESULT = getstatus()
+  }
+
     stages {
         stage('Check Stack Exists or Not') {
             steps {
-            script{
-            STACK_CHECK_RESULT=sh(
-            script: "aws cloudformation describe-stacks --stack-name S3Coy --region us-east-1",
-            returnStdout: true
-           ).trim()
-           echo "Status of Stack: ${STACK_CHECK_RESULT}"
-           }
+            echo "${STACK_CHECK_RESULT}"
            }
         }
-        stage('Create With out Delete') {
+        stage('Create With Delete') {
             when{
-            expression{params.STACK_CHECK==${STACK_CHECK_RESULT}}
+            expression{"${STACK_CHECK_RESULT}"=="0"}
             }
             steps {
-                echo "In Create without delete"
-
+                echo "The Stack Already Exist"
+                echo "Started Deleting Stack"
+                sh "aws cloudformation delete-stack --stack-name S3Copy --region us-east-1"
+                sleep(time:1,unit:"MINUTES")
+                echo "Stack Deleted"
+                echo "Started Creating Stack"
+                sh "aws cloudformation create-stack --stack-name S3Copy --template-body file://S3Copier.yml --parameters ParameterKey=REPO,ParameterValue=git://github.com/arijitArusan/Project178963 ParameterKey=VID,ParameterValue=178963 --region 'us-east-1'"
+                echo "Job Created"
+              }
+             }
+        stage('Create Without Delete') {
+            when{
+            expression{"${STACK_CHECK_RESULT}"=="255"}
+            }
+            steps {
+                echo "Started Creating Stack"
+                sh "aws cloudformation create-stack --stack-name S3Copy --template-body file://S3Copier.yml --parameters ParameterKey=REPO,ParameterValue=git://github.com/arijitArusan/Project178963 ParameterKey=VID,ParameterValue=178963 --region 'us-east-1'"
+                echo "Job Created"
               }
              }
             }
