@@ -11,7 +11,7 @@ pipeline {
             steps {
             script{
             STACK_CHECK_RESULT=sh(
-            script: "aws cloudformation describe-stacks --stack-name S3Copy",
+            script: "aws cloudformation describe-stacks --stack-name S3Copy --region us-east-1",
             returnStdout: true
            ).trim()
            echo "Status of Stack: ${STACK_CHECK_RESULT}"
