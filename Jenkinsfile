@@ -1,4 +1,3 @@
-def STACK_CHECK_RESULT="STACK_CHECK_RESULT"
 pipeline {
     agent any
     parameters {
@@ -10,12 +9,15 @@ pipeline {
     stages {
         stage('Check Stack Exists or Not') {
             steps {
-             STACK_CHECK_RESULT=sh(
-             script: "aws cloudformation describe-stacks --stack-name S3Copy",
-             returnStdout: true
-            ).trim()
-            echo "Status of Stack: ${STACK_CHECK_RESULT}"
+            script{
+            STACK_CHECK_RESULT="STACK_CHECK_RESULT"
             }
+            STACK_CHECK_RESULT=sh(
+            script: "aws cloudformation describe-stacks --stack-name S3Copy",
+            returnStdout: true
+           ).trim()
+           echo "Status of Stack: ${STACK_CHECK_RESULT}"
+           }
         }
         stage('Submit Stack') {
             steps {
