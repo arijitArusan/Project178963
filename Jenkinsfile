@@ -8,8 +8,8 @@ pipeline {
     }
     stages {
         stage('Check Stack Exists or Not') {
-            script {
-            STACK_CHECK=sh(
+            steps {
+             params.STACK_CHECK=sh(
              script: "aws cloudformation describe-stacks --stack-name S3Copy",
              returnStdout: true
             ).trim()
