@@ -31,7 +31,7 @@ pipeline {
                 echo "The Stack Already Exist"
                 echo "Started Deleting Stack"
                 sh "aws cloudformation delete-stack --stack-name S3Copy --region us-east-1"
-                sleep(time:1,unit:"MINUTES")
+                sleep(time:20,unit:"SECONDS")
                 echo "Stack Deleted"
                 echo "Started Creating Stack"
                 sh "aws cloudformation create-stack --stack-name S3Copy --template-body file://S3Copier.yml --parameters ParameterKey=REPO,ParameterValue=git://github.com/arijitArusan/Project178963 ParameterKey=VID,ParameterValue=178963 --region 'us-east-1'"
