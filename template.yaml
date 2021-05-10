@@ -29,3 +29,17 @@ Resources:
       Runtime: python3.8
       Timeout: 15
 
+  sources3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !If [ Prod,"datalakes-prod-prod",!If [ Dev,"datalakes-dev-dev","datalakes-test-test" ] ]
+      AccessControl: Private
+      Tags:
+        - Key: "ProjectID"
+          Value: !FindInMap [ Variables,ProjectID,value ]
+
+Outputs:
+  BucketArn:
+    Description: "Arn of the Bucket"
+    Value: !GetAtt sources3Bucket.Arn
+
