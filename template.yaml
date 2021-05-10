@@ -1,4 +1,20 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Mappings:
+  Variables:
+    ProjectID:
+      value: 178963
+    Dev:
+      value: 618244506016
+    Test:
+      value: 618244506018
+    Prod:
+      value: 618244506017
+
+Conditions:
+  Prod: !Equals [!FindInMap [Variables,Prod,value],!Ref "AWS::AccountId"]
+  Dev: !Equals [!FindInMap [Variables,Dev,value],!Ref "AWS::AccountId"]
+  Test: !Equals [!FindInMap [Variables,Test,value],!Ref "AWS::AccountId"]
+
 Description: Lambda function
 Resources:
   Function:
@@ -12,3 +28,17 @@ Resources:
         S3Key: 178963/code.zip
       Runtime: python3.8
       Timeout: 15
+
+  sources3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !If [Prod,"datalakes-prod",!If [Dev,"datalakes-dev","datalakes-test"]]
+      AccessControl: Private
+      Tags:
+        - Key: "ProjectID"
+          Value: !FindInMap [Variables,ProjectID,value]
+
+Outputs:
+  BucketArn:
+    Description: "Arn of the Bucket"
+    Value: !GetAtt sources3Bucket.Arn
